@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Системы счисления — Тренажёр 6 класс</title>
+  <style>
+    /* RESET & SYSTEM FONTS */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: #FFFFFF;
+      color: #0F172A;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+      user-select: none;
+    }
+
+    /* TYPOGRAPHY ACCENTS */
+    .num-base {
+      color: #4F46E5;
+      font-weight: 700;
+      font-size: 0.75em;
+      vertical-align: sub;
+      line-height: 0;
+      margin-left: 2px;
+    }
+
+    .num-exp {
+      color: #EA580C;
+      font-weight: 700;
+      font-size: 0.75em;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    .pos-index {
+      color: #EA580C;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1;
+      text-align: center;
+      display: inline-block;
+    }
+
+    /* LAYOUT CONTAINERS */
+    .app-screen {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .app-screen.active {
+      display: flex;
+    }
+
+    /* START / WAITING SCREEN */
+    .start-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .badge-pill {
+      background: #EFF6FF;
+      color: #2563EB;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      border: 1px solid #BFDBFE;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .start-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      color: #0F172A;
+      margin-bottom: 28px;
+      line-height: 1.25;
+    }
+
+    .timer-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 24px;
+      padding: 28px 36px;
+      width: 100%;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .countdown-display {
+      font-size: clamp(38px, 7vw, 64px);
+      font-weight: 800;
+      color: #3B82F6;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      font-family: inherit;
+    }
+
+    .countdown-labels {
+      display: flex;
+      justify-content: space-around;
+      color: #64748B;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .schedule-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #F1F5F9;
+      color: #475569;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 9999px;
+    }
+
+    /* TOP HEADER BAR (ACTIVE MODE) */
+    .top-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stage-pill {
+      background: #EFF6FF;
+      color: #2563EB;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid #BFDBFE;
+      white-space: nowrap;
+    }
+
+    .stage-name {
+      font-weight: 700;
+      color: #0F172A;
+      font-size: 16px;
+    }
+
+    .bar-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .type-chip {
+      background: #F1F5F9;
+      color: #64748B;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .type-chip.completed {
+      background: #ECFDF5;
+      color: #059669;
+      border: 1px solid #A7F3D0;
+    }
+
+    .stage-point-chip {
+      background: #ECFDF5;
+      color: #059669;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1px solid #A7F3D0;
+      display: none;
+    }
+
+    .stage-point-chip.visible {
+      display: inline-flex;
+    }
+
+    .bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .score-pill {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      color: #0F172A;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 6px 16px;
+      border-radius: 12px;
+    }
+
+    .stage-timer {
+      background: #FEF3C7;
+      color: #B45309;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid #FDE68A;
+    }
+
+    .stage-timer.warning {
+      background: #FFE4E6;
+      color: #E11D48;
+      border-color: #FECDD3;
+      animation: pulse-warn 1s infinite alternate;
+    }
+
+    @keyframes pulse-warn {
+      from { opacity: 1; }
+      to { opacity: 0.7; }
+    }
+
+    /* ACTIVE TASK CONTENT AREA */
+    .task-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 100px 20px;
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .task-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 24px;
+      padding: 36px 32px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.02);
+    }
+
+    .task-instruction {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0F172A;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* INPUT STYLING */
+    .num-input {
+      border: 2px solid #CBD5E1;
+      background: #FFFFFF;
+      border-radius: 16px;
+      font-size: 30px;
+      font-weight: 800;
+      color: #0F172A;
+      text-align: center;
+      outline: none;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .num-input:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+    }
+
+    .num-input.correct {
+      background: #ECFDF5 !important;
+      border-color: #10B981 !important;
+      color: #065F46 !important;
+    }
+
+    .num-input.incorrect {
+      background: #FFF1F2 !important;
+      border-color: #F43F5E !important;
+      color: #9F1239 !important;
+      animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* NEIGHBOR & SEQUENCE ROW (CRITICAL LAYOUT RULE) */
+    .row-5-items {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .row-5-items .num-input {
+      width: clamp(84px, 14vw, 112px);
+      height: 72px;
+      font-size: clamp(22px, 3.5vw, 30px);
+    }
+
+    .row-5-items .center-num-badge {
+      font-size: clamp(28px, 4.5vw, 44px);
+      font-weight: 800;
+      color: #0F172A;
+      padding: 0 8px;
+      white-space: nowrap;
+    }
+
+    /* STEP BY STEP GUIDED TASK STYLES */
+    .steps-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0F172A;
+      width: 100%;
+    }
+
+    .step-row.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .digit-index-header {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 1px;
+    }
+
+    .number-with-indices {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      font-size: 40px;
+      font-weight: 800;
+      color: #0F172A;
+      padding: 8px 16px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+    }
+
+    /* CENTERED TARGET BOX FOR STAGES 6, 8, 10 */
+    .target-box-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .target-input {
+      width: 220px;
+      height: 76px;
+      font-size: 36px;
+      letter-spacing: 2px;
+    }
+
+    .power-series-display {
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 800;
+      color: #0F172A;
+      text-align: center;
+      line-height: 1.6;
+      padding: 12px 20px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 20px;
+      width: 100%;
+    }
+
+    .notice-chip {
+      background: #FFFBEB;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      margin-top: -8px;
+    }
+
+    /* BUTTONS & FEEDBACK AREA */
+    .controls-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-action {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      border-radius: 16px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #3B82F6;
+      color: #FFFFFF;
+      font-size: 19px;
+      padding: 16px 48px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #2563EB;
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-next {
+      background: #10B981;
+      color: #FFFFFF;
+      font-size: 19px;
+      padding: 16px 48px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-next:hover {
+      background: #059669;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .feedback-msg {
+      font-size: 15px;
+      font-weight: 700;
+      min-height: 24px;
+      text-align: center;
+    }
+
+    .feedback-msg.success { color: #059669; }
+    .feedback-msg.error { color: #E11D48; }
+
+    /* BOTTOM ALPHABET CHEAT SHEET */
+    .cheat-sheet-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border-top: 1px solid #E2E8F0;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+      z-index: 20;
+    }
+
+    .cheat-sheet-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748B;
+      margin-right: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cheat-tile {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0F172A;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .cheat-tile.active:hover {
+      background: #EFF6FF;
+      border-color: #3B82F6;
+      color: #2563EB;
+      transform: translateY(-2px);
+    }
+
+    .cheat-tile.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background: #F1F5F9;
+      border-color: #E2E8F0;
+    }
+
+    /* FINAL SCREEN (STRICTLY MINIMALIST) */
+    .final-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .final-score-giant {
+      font-size: clamp(88px, 16vw, 180px);
+      font-weight: 900;
+      color: #0F172A;
+      line-height: 1;
+      letter-spacing: -2px;
+      text-align: center;
+    }
+
+    /* TEACHER MODAL PANEL */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .teacher-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      border: 1px solid #E2E8F0;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .teacher-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .teacher-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .close-btn {
+      background: #F1F5F9;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+      color: #64748B;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .teacher-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .teacher-btn {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      color: #0F172A;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .teacher-btn:hover {
+      background: #EFF6FF;
+      border-color: #BFDBFE;
+      color: #2563EB;
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .grid-stage-btn {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 10px 4px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #0F172A;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .grid-stage-btn.active {
+      background: #3B82F6;
+      color: #FFFFFF;
+      border-color: #3B82F6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. START / WAITING SCREEN -->
+  <div id="screen-start" class="app-screen active">
+    <div class="start-container">
+      <div class="badge-pill">Информатика • 6 класс</div>
+      <h1 class="start-title">Системы счисления</h1>
+      
+      <div class="timer-card">
+        <div id="start-timer-val" class="countdown-display">00 : 00 : 00</div>
+        <div class="countdown-labels">
+          <span>часы</span>
+          <span>минуты</span>
+          <span>секунды</span>
+        </div>
+      </div>
+
+      <div class="schedule-pill">
+        <span>🕒 Начало урока в 13:10</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ACTIVE TASK SCREEN -->
+  <div id="screen-active" class="app-screen">
+    <header class="top-bar">
+      <div class="bar-left">
+        <div id="top-stage-pill" class="stage-pill">Этап 1 / 10</div>
+        <div id="top-stage-name" class="stage-name">Соседи по счёту</div>
+      </div>
+      
+      <div class="bar-center">
+        <div id="chip-type-a" class="type-chip">Тип 1</div>
+        <div id="chip-type-b" class="type-chip">Тип 2</div>
+        <div id="chip-stage-point" class="stage-point-chip">+1 балл ✓</div>
+      </div>
+
+      <div class="bar-right">
+        <div id="top-score-pill" class="score-pill">Баллы: 0 / 10</div>
+        <div id="top-stage-timer" class="stage-timer">03:00</div>
+      </div>
+    </header>
+
+    <main class="task-container">
+      <div class="task-card">
+        <div id="task-prompt" class="task-instruction"></div>
+        <div id="task-body" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px;"></div>
+        
+        <div class="controls-wrapper">
+          <button id="btn-submit" class="btn-action btn-primary" onclick="checkTaskAnswer()">Проверить</button>
+          <button id="btn-next" class="btn-action btn-next" style="display: none;" onclick="advanceTask()">Дальше →</button>
+          <div id="feedback-msg" class="feedback-msg"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- BOTTOM CHEAT SHEET FOR BASES > 10 -->
+    <div id="cheat-sheet" class="cheat-sheet-bar" style="display: none;">
+      <span class="cheat-sheet-title">Шпаргалка:</span>
+      <button class="cheat-tile" data-letter="A" data-val="10" onclick="handleCheatTileClick('A', '10')">A = 10</button>
+      <button class="cheat-tile" data-letter="B" data-val="11" onclick="handleCheatTileClick('B', '11')">B = 11</button>
+      <button class="cheat-tile" data-letter="C" data-val="12" onclick="handleCheatTileClick('C', '12')">C = 12</button>
+      <button class="cheat-tile" data-letter="D" data-val="13" onclick="handleCheatTileClick('D', '13')">D = 13</button>
+      <button class="cheat-tile" data-letter="E" data-val="14" onclick="handleCheatTileClick('E', '14')">E = 14</button>
+      <button class="cheat-tile" data-letter="F" data-val="15" onclick="handleCheatTileClick('F', '15')">F = 15</button>
+    </div>
+  </div>
+
+  <!-- 3. FINAL SCREEN -->
+  <div id="screen-final" class="app-screen">
+    <div class="final-container">
+      <div id="final-score-val" class="final-score-giant">0 / 10</div>
+    </div>
+  </div>
+
+  <!-- 4. HIDDEN TEACHER PANEL (ALT + S) -->
+  <div id="teacher-modal" class="modal-backdrop" onclick="handleModalBackdropClick(event)">
+    <div class="teacher-card">
+      <div class="teacher-header">
+        <h2 class="teacher-title">Панель учителя</h2>
+        <button class="close-btn" onclick="closeTeacherModal()">×</button>
+      </div>
+
+      <div class="teacher-actions">
+        <button class="teacher-btn" onclick="setModeLiveNow()">▶ Запустить урок сейчас (35 мин)</button>
+        <button class="teacher-btn" onclick="setModeSchedule()">🕒 По расписанию (13:10)</button>
+        <button class="teacher-btn" onclick="setModeManualFinish()">🏁 Финальный экран</button>
+        <button class="teacher-btn" style="color: #E11D48;" onclick="resetAllProgress()">🔄 Сбросить баллы и прогресс</button>
+      </div>
+
+      <div style="font-weight: 700; font-size: 14px; color: #64748B; margin-bottom: 10px;">Перейти к этапу:</div>
+      <div class="stage-grid" id="teacher-stage-grid">
+        <!-- 10 buttons dynamically inserted -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* STAGE CONFIGURATION */
+    const STAGE_CONFIG = [
+      { id: 1, name: "Соседи по счёту", duration: 180 },
+      { id: 2, name: "Прыжок через разряд", duration: 180 },
+      { id: 3, name: "Числа с буквами", duration: 180 },
+      { id: 4, name: "Переход с буквами", duration: 180 },
+      { id: 5, name: "Раскладываем десятки", duration: 210 },
+      { id: 6, name: "Собираем число из ряда", duration: 210 },
+      { id: 7, name: "Малые системы: раскладываем", duration: 240 },
+      { id: 8, name: "Малые системы: собираем", duration: 240 },
+      { id: 9, name: "Большие системы: раскладываем", duration: 240 },
+      { id: 10, name: "Большие системы: собираем", duration: 240 }
+    ];
+
+    const TOTAL_LESSON_SECONDS = 2100; // 35 min
+
+    /* APP STATE */
+    let appMode = 'schedule'; // 'schedule' | 'live_now' | 'manual_stage' | 'manual_finish'
+    let liveStartTime = null;
+    let manualStageIndex = 0;
+    
+    let currentStageIndex = 0;
+    let stageSecondsRemaining = 180;
+
+    let stageProgress = Array(10).fill(null).map(() => ({ typeA: false, typeB: false }));
+    let lastTaskType = null; // 'A' or 'B'
+    let currentTask = null;
+    let focusedInput = null;
+
+    /* STORAGE HELPER */
+    function getTodayKey() {
+      const d = new Date();
+      return `cs6_trainer_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function loadSavedProgress() {
+      try {
+        const saved = localStorage.getItem(getTodayKey());
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === 10) {
+            stageProgress = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Storage read error:', e);
+      }
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(getTodayKey(), JSON.stringify(stageProgress));
+      } catch (e) {
+        console.warn('Storage write error:', e);
+      }
+    }
+
+    function calculateTotalScore() {
+      return stageProgress.reduce((acc, st) => acc + (st.typeA && st.typeB ? 1 : 0), 0);
+    }
+
+    /* MATH & UTILS */
+    function toBaseString(num, base) {
+      return num.toString(base).toUpperCase();
+    }
+
+    function parseBaseString(str, base) {
+      return parseInt(str, base);
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getSubscriptDigits(num) {
+      const subs = ['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉','₁₀','₁₁','₁₂','₁₃','₁₄','₁₅','₁₆'];
+      if (num <= 16) return subs[num] || `₍${num}₎`;
+      return `₍${num}₎`;
+    }
+
+    function formatNumberWithBase(strVal, base) {
+      return `<span>${strVal}</span><sub class="num-base">${base}</sub>`;
+    }
+
+    /* MAIN TICKER & STATE MACHINE */
+    function init() {
+      loadSavedProgress();
+      renderTeacherStageGrid();
+      setupKeyboardListeners();
+
+      setInterval(tickStateMachine, 500);
+      tickStateMachine();
+    }
+
+    function tickStateMachine() {
+      const now = new Date();
+      let state = 'waiting'; // 'waiting' | 'active' | 'finished'
+      let activeIndex = 0;
+      let stageSeconds = 0;
+
+      if (appMode === 'manual_finish') {
+        state = 'finished';
+      } else if (appMode === 'manual_stage') {
+        state = 'active';
+        activeIndex = manualStageIndex;
+        if (!liveStartTime) liveStartTime = Date.now();
+        const elapsedSec = Math.floor((Date.now() - liveStartTime) / 1000);
+        const dur = STAGE_CONFIG[activeIndex].duration;
+        if (elapsedSec >= dur) {
+          // move to next stage in manual timer
+          if (activeIndex < 9) {
+            manualStageIndex++;
+            liveStartTime = Date.now();
+            activeIndex = manualStageIndex;
+            stageSeconds = STAGE_CONFIG[activeIndex].duration;
+          } else {
+            state = 'finished';
+          }
+        } else {
+          stageSeconds = dur - elapsedSec;
+        }
+      } else if (appMode === 'live_now') {
+        if (!liveStartTime) liveStartTime = Date.now();
+        const elapsedTotal = Math.floor((Date.now() - liveStartTime) / 1000);
+        if (elapsedTotal >= TOTAL_LESSON_SECONDS) {
+          state = 'finished';
+        } else {
+          state = 'active';
+          let accum = 0;
+          for (let i = 0; i < 10; i++) {
+            if (elapsedTotal < accum + STAGE_CONFIG[i].duration) {
+              activeIndex = i;
+              stageSeconds = (accum + STAGE_CONFIG[i].duration) - elapsedTotal;
+              break;
+            }
+            accum += STAGE_CONFIG[i].duration;
+          }
+        }
+      } else {
+        // 'schedule' mode: Start 13:10:00
+        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 10, 0, 0);
+        const endToday = new Date(startToday.getTime() + TOTAL_LESSON_SECONDS * 1000);
+
+        if (now < startToday) {
+          state = 'waiting';
+          const remMs = startToday.getTime() - now.getTime();
+          const remSec = Math.ceil(remMs / 1000);
+          updateStartCountdown(remSec);
+        } else if (now >= endToday) {
+          state = 'finished';
+        } else {
+          state = 'active';
+          const elapsedSec = Math.floor((now.getTime() - startToday.getTime()) / 1000);
+          let accum = 0;
+          for (let i = 0; i < 10; i++) {
+            if (elapsedSec < accum + STAGE_CONFIG[i].duration) {
+              activeIndex = i;
+              stageSeconds = (accum + STAGE_CONFIG[i].duration) - elapsedSec;
+              break;
+            }
+            accum += STAGE_CONFIG[i].duration;
+          }
+        }
+      }
+
+      switchScreen(state, activeIndex, stageSeconds);
+    }
+
+    function updateStartCountdown(totalSec) {
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const str = `${String(h).padStart(2,'0')} : ${String(m).padStart(2,'0')} : ${String(s).padStart(2,'0')}`;
+      const el = document.getElementById('start-timer-val');
+      if (el) el.textContent = str;
+    }
+
+    function switchScreen(state, stageIdx = 0, stageSec = 0) {
+      const screenStart = document.getElementById('screen-start');
+      const screenActive = document.getElementById('screen-active');
+      const screenFinal = document.getElementById('screen-final');
+
+      if (state === 'finished') {
+        screenStart.classList.remove('active');
+        screenActive.classList.remove('active');
+        screenFinal.classList.add('active');
+
+        // Apply dynamic score color
+        const score = calculateTotalScore();
+        document.getElementById('final-score-val').textContent = `${score} / 10`;
+        const scoreColors = [
+          '#FECDD3', '#FECDD3', '#FED7D7', '#FDE2C4', '#FEF3C7',
+          '#FEF08A', '#FEF08A', '#ECFCCB', '#D9F99D', '#BBF7D0', '#A7F3D0'
+        ];
+        document.body.style.backgroundColor = scoreColors[score] || '#A7F3D0';
+        updateCheatSheetVisibility(false);
+        return;
+      }
+
+      // Reset crisp white background when not on final screen
+      document.body.style.backgroundColor = '#FFFFFF';
+
+      if (state === 'waiting') {
+        screenActive.classList.remove('active');
+        screenFinal.classList.remove('active');
+        screenStart.classList.add('active');
+        updateCheatSheetVisibility(false);
+        return;
+      }
+
+      // 'active'
+      screenStart.classList.remove('active');
+      screenFinal.classList.remove('active');
+      screenActive.classList.add('active');
+
+      if (currentStageIndex !== stageIdx || !currentTask) {
+        currentStageIndex = stageIdx;
+        loadStageTask();
+      }
+
+      stageSecondsRemaining = stageSec;
+      updateHeaderUI();
+    }
+
+    function updateHeaderUI() {
+      const st = STAGE_CONFIG[currentStageIndex];
+      document.getElementById('top-stage-pill').textContent = `Этап ${st.id} / 10`;
+      document.getElementById('top-stage-name').textContent = st.name;
+
+      const prog = stageProgress[currentStageIndex];
+      const chipA = document.getElementById('chip-type-a');
+      const chipB = document.getElementById('chip-type-b');
+      const chipPt = document.getElementById('chip-stage-point');
+
+      if (prog.typeA) {
+        chipA.classList.add('completed');
+        chipA.textContent = 'Тип 1 ✓';
+      } else {
+        chipA.classList.remove('completed');
+        chipA.textContent = 'Тип 1';
+      }
+
+      if (prog.typeB) {
+        chipB.classList.add('completed');
+        chipB.textContent = 'Тип 2 ✓';
+      } else {
+        chipB.classList.remove('completed');
+        chipB.textContent = 'Тип 2';
+      }
+
+      if (prog.typeA && prog.typeB) {
+        chipPt.classList.add('visible');
+      } else {
+        chipPt.classList.remove('visible');
+      }
+
+      document.getElementById('top-score-pill').textContent = `Баллы: ${calculateTotalScore()} / 10`;
+
+      const m = Math.floor(stageSecondsRemaining / 60);
+      const s = stageSecondsRemaining % 60;
+      const timerEl = document.getElementById('top-stage-timer');
+      timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      
+      if (stageSecondsRemaining <= 30) {
+        timerEl.classList.add('warning');
+      } else {
+        timerEl.classList.remove('warning');
+      }
+
+      // Update Cheat Sheet visibility
+      const needCheatSheet = currentTask && currentTask.base > 10 && [3,4,9,10].includes(currentStageIndex + 1);
+      updateCheatSheetVisibility(needCheatSheet, currentTask ? currentTask.base : 10);
+    }
+
+    function updateCheatSheetVisibility(show, base = 10) {
+      const bar = document.getElementById('cheat-sheet');
+      if (!show) {
+        bar.style.display = 'none';
+        return;
+      }
+      bar.style.display = 'flex';
+
+      const tiles = bar.querySelectorAll('.cheat-tile');
+      tiles.forEach(tile => {
+        const tileVal = parseInt(tile.getAttribute('data-val'), 10);
+        if (tileVal < base) {
+          tile.classList.remove('disabled');
+          tile.classList.add('active');
+        } else {
+          tile.classList.remove('active');
+          tile.classList.add('disabled');
+        }
+      });
+    }
+
+    /* TASK GENERATOR ROUTER */
+    function loadStageTask() {
+      const prog = stageProgress[currentStageIndex];
+      let typeToServe = 'A';
+      
+      if (!prog.typeA && prog.typeB) {
+        typeToServe = 'A';
+      } else if (prog.typeA && !prog.typeB) {
+        typeToServe = 'B';
+      } else {
+        typeToServe = (lastTaskType === 'A') ? 'B' : 'A';
+      }
+      
+      lastTaskType = typeToServe;
+      currentTask = generateTask(currentStageIndex + 1, typeToServe);
+
+      renderCurrentTask();
+    }
+
+    function generateTask(stageNum, type) {
+      switch (stageNum) {
+        case 1: // «Соседи по счёту» (bases 5–9)
+          if (type === 'A') {
+            const base = randomInt(5, 9);
+            const d1 = randomInt(1, base - 1);
+            const d0 = randomInt(2, base - 3);
+            const n = d1 * base + d0;
+            return {
+              stage: 1, type: 'A', base,
+              prompt: `Назови двух соседей слева и двух справа в ${base}-ричной системе:`,
+              layout: 'neighbors',
+              centerVal: toBaseString(n, base),
+              answers: [toBaseString(n-2, base), toBaseString(n-1, base), toBaseString(n+1, base), toBaseString(n+2, base)]
+            };
+          } else {
+            const base = randomInt(6, 9);
+            const d1 = randomInt(1, base - 1);
+            const d0 = randomInt(0, base - 5);
+            const n = d1 * base + d0;
+            return {
+              stage: 1, type: 'B', base,
+              prompt: `Вставь пропущенные числа в ряд (${base}-ричная система):`,
+              layout: 'sequence_5',
+              items: [
+                { type: 'fixed', val: toBaseString(n, base) },
+                { type: 'input', ans: toBaseString(n+1, base) },
+                { type: 'fixed', val: toBaseString(n+2, base) },
+                { type: 'input', ans: toBaseString(n+3, base) },
+                { type: 'fixed', val: toBaseString(n+4, base) }
+              ]
+            };
+          }
+
+        case 2: // «Прыжок через разряд» (bases 4–9)
+          if (type === 'A') {
+            const base = randomInt(4, 9);
+            const isUpper = Math.random() < 0.5;
+            let n;
+            if (isUpper) {
+              const d1 = randomInt(1, base - 1);
+              n = d1 * base + (base - 1); // e.g. 37_8 or 24_5
+            } else {
+              const d1 = randomInt(1, base - 1);
+              n = d1 * base; // e.g. 20_5
+            }
+            return {
+              stage: 2, type: 'A', base,
+              prompt: `Найди соседей при переходе через разряд (${base}-ричная система):`,
+              layout: 'neighbors',
+              centerVal: toBaseString(n, base),
+              answers: [toBaseString(n-2, base), toBaseString(n-1, base), toBaseString(n+1, base), toBaseString(n+2, base)]
+            };
+          } else {
+            const base = randomInt(4, 9);
+            const d1 = randomInt(1, base - 2);
+            const nA = d1 * base + (base - 1); // e.g., 25_6
+            const nB = (d1 + 1) * base;        // e.g., 40_6
+            return {
+              stage: 2, type: 'B', base,
+              prompt: `Сделай шаг вперёд и шаг назад (${base}-ричная система):`,
+              layout: 'equations_2',
+              eqs: [
+                { left: `${toBaseString(nA, base)}<sub>${base}</sub> + 1`, ans: toBaseString(nA + 1, base) },
+                { left: `${toBaseString(nB, base)}<sub>${base}</sub> − 1`, ans: toBaseString(nB - 1, base) }
+              ]
+            };
+          }
+
+        case 3: // «Числа с буквами» (bases 12–16)
+          if (type === 'A') {
+            const base = randomInt(12, 16);
+            const d1 = randomInt(1, 9);
+            const d0 = randomInt(9, base - 3); // includes letters!
+            const n = d1 * base + d0;
+            return {
+              stage: 3, type: 'A', base,
+              prompt: `Запиши двух соседей слева и двух справа (${base}-ричная система):`,
+              layout: 'neighbors',
+              centerVal: toBaseString(n, base),
+              answers: [toBaseString(n-2, base), toBaseString(n-1, base), toBaseString(n+1, base), toBaseString(n+2, base)]
+            };
+          } else {
+            const base = randomInt(14, 16);
+            const d1 = randomInt(1, 9);
+            const d0 = randomInt(9, base - 5);
+            const n = d1 * base + d0;
+            return {
+              stage: 3, type: 'B', base,
+              prompt: `Восстанови пропущенные числа с буквами (${base}-ричная система):`,
+              layout: 'sequence_5',
+              items: [
+                { type: 'fixed', val: toBaseString(n, base) },
+                { type: 'input', ans: toBaseString(n+1, base) },
+                { type: 'fixed', val: toBaseString(n+2, base) },
+                { type: 'input', ans: toBaseString(n+3, base) },
+                { type: 'fixed', val: toBaseString(n+4, base) }
+              ]
+            };
+          }
+
+        case 4: // «Переход с буквами» (bases 12–16)
+          if (type === 'A') {
+            const base = randomInt(12, 16);
+            const isUpper = Math.random() < 0.5;
+            let n;
+            if (isUpper) {
+              const d1 = randomInt(1, 5);
+              n = d1 * base + (base - 1); // e.g. 1F_16
+            } else {
+              const d1 = randomInt(1, 6);
+              n = d1 * base; // e.g. 20_16
+            }
+            return {
+              stage: 4, type: 'A', base,
+              prompt: `Найди соседей с переходом через разряд (${base}-ричная система):`,
+              layout: 'neighbors',
+              centerVal: toBaseString(n, base),
+              answers: [toBaseString(n-2, base), toBaseString(n-1, base), toBaseString(n+1, base), toBaseString(n+2, base)]
+            };
+          } else {
+            const base = randomInt(12, 16);
+            const d1 = randomInt(1, 5);
+            const nA = d1 * base + (base - 1);
+            const nB = (d1 + 1) * base;
+            return {
+              stage: 4, type: 'B', base,
+              prompt: `Выполни шаг вперёд и шаг назад (${base}-ричная система):`,
+              layout: 'equations_2',
+              eqs: [
+                { left: `${toBaseString(nA, base)}<sub>${base}</sub> + 1`, ans: toBaseString(nA + 1, base) },
+                { left: `${toBaseString(nB, base)}<sub>${base}</sub> − 1`, ans: toBaseString(nB - 1, base) }
+              ]
+            };
+          }
+
+        case 5: // «Раскладываем десятки» (base 10)
+          if (type === 'A') {
+            const d3 = randomInt(1, 9);
+            const d2 = randomInt(0, 9);
+            const d1 = randomInt(0, 9);
+            const d0 = randomInt(1, 9);
+            const numStr = `${d3}${d2}${d1}${d0}`;
+            return {
+              stage: 5, type: 'A', base: 10,
+              prompt: `Запиши цифры числа в степенной ряд:`,
+              layout: 'power_expand_10',
+              numStr,
+              digits: [d3, d2, d1, d0]
+            };
+          } else {
+            const d2 = randomInt(1, 9);
+            const d1 = randomInt(1, 9);
+            const d0 = randomInt(1, 9);
+            const numStr = `${d2}${d1}${d0}`;
+            return {
+              stage: 5, type: 'B', base: 10,
+              prompt: `Разложи число и найди значение каждого слагаемого:`,
+              layout: 'guided_expand_10',
+              numStr,
+              step1Ans: [d2, d1, d0],
+              step2Ans: [d2 * 100, d1 * 10, d0]
+            };
+          }
+
+        case 6: // «Собираем число из ряда» (base 10) — NO EXPONENT INPUTS
+          if (type === 'A') {
+            const d3 = randomInt(1, 9);
+            const d2 = Math.random() < 0.5 ? 0 : randomInt(1, 9);
+            const d1 = d2 === 0 ? randomInt(1, 9) : 0;
+            const d0 = randomInt(1, 9);
+            const seriesTerms = [];
+            if (d3) seriesTerms.push(`${d3} × 10³`);
+            if (d2) seriesTerms.push(`${d2} × 10²`);
+            if (d1) seriesTerms.push(`${d1} × 10¹`);
+            if (d0) seriesTerms.push(`${d0} × 10⁰`);
+            const targetAns = `${d3}${d2}${d1}${d0}`;
+            return {
+              stage: 6, type: 'A', base: 10,
+              prompt: `Собери число из степенного ряда:`,
+              layout: 'assemble_target',
+              seriesHtml: seriesTerms.join(' + '),
+              notice: 'Внимание: некоторые разряды пропущены!',
+              targetAns
+            };
+          } else {
+            const d3 = randomInt(1, 9);
+            const d2 = randomInt(1, 9);
+            const d1 = randomInt(1, 9);
+            const d0 = randomInt(1, 9);
+            const terms = [
+              { str: `${d0} × 10⁰`, p: 0 },
+              { str: `${d2} × 10²`, p: 2 },
+              { str: `${d3} × 10³`, p: 3 },
+              { str: `${d1} × 10¹`, p: 1 }
+            ].sort(() => Math.random() - 0.5);
+            const targetAns = `${d3}${d2}${d1}${d0}`;
+            return {
+              stage: 6, type: 'B', base: 10,
+              prompt: `Степени перепутаны — собери число правильно:`,
+              layout: 'assemble_target',
+              seriesHtml: terms.map(t => t.str).join(' + '),
+              notice: 'Обрати внимание на показатели степеней!',
+              targetAns
+            };
+          }
+
+        case 7: // «Малые системы: раскладываем» (bases 2–9)
+          if (type === 'A') {
+            const base = randomInt(2, 9);
+            let digits = [];
+            if (base === 2) {
+              digits = [1, randomInt(0,1), randomInt(0,1), 1];
+            } else {
+              digits = [randomInt(1, base - 1), randomInt(0, base - 1), randomInt(1, base - 1)];
+            }
+            const numStr = digits.join('');
+            return {
+              stage: 7, type: 'A', base,
+              prompt: `Запиши цифры числа в степенной ряд (${base}-ричная система):`,
+              layout: 'power_expand_small',
+              numStr,
+              digits
+            };
+          } else {
+            let base, digits, step2Ans, finalAns;
+            const r = Math.random();
+            if (r < 0.25) {
+              base = 2;
+              digits = [1, randomInt(0,1), randomInt(0,1), randomInt(0,1)];
+              const p = [8, 4, 2, 1];
+              step2Ans = digits.map((d, i) => d * p[i]);
+              finalAns = step2Ans.reduce((a,b) => a+b, 0);
+            } else if (r < 0.5) {
+              base = 3;
+              digits = [randomInt(1,2), randomInt(0,2), randomInt(1,2)];
+              step2Ans = [digits[0]*9, digits[1]*3, digits[2]*1];
+              finalAns = step2Ans.reduce((a,b) => a+b, 0);
+            } else if (r < 0.75) {
+              base = 5;
+              digits = [1, randomInt(0,4), randomInt(1,4)];
+              step2Ans = [digits[0]*25, digits[1]*5, digits[2]*1];
+              finalAns = step2Ans.reduce((a,b) => a+b, 0);
+            } else {
+              base = randomInt(6, 8);
+              digits = [randomInt(2, 5), randomInt(1, base - 1)];
+              step2Ans = [digits[0]*base, digits[1]*1];
+              finalAns = step2Ans.reduce((a,b) => a+b, 0);
+            }
+
+            return {
+              stage: 7, type: 'B', base,
+              prompt: `Переведи число в десятичную систему шаг за шагом:`,
+              layout: 'guided_convert_small',
+              numStr: digits.join(''),
+              digits,
+              step2Ans,
+              finalAns: String(finalAns)
+            };
+          }
+
+        case 8: // «Малые системы: собираем» (bases 2–9 — NO EXPONENT INPUTS)
+          if (type === 'A') {
+            const base = randomInt(2, 8);
+            let d3 = randomInt(1, base - 1);
+            let d2 = 0; // missing power 2
+            let d1 = randomInt(1, base - 1);
+            let d0 = randomInt(1, base - 1);
+            const seriesTerms = [
+              `${d3} × ${base}³`,
+              `${d1} × ${base}¹`,
+              `${d0} × ${base}⁰`
+            ];
+            return {
+              stage: 8, type: 'A', base,
+              prompt: `Собери число в ${base}-ричной системе счисления:`,
+              layout: 'assemble_target',
+              seriesHtml: seriesTerms.join(' + '),
+              notice: 'Не забудь 0 на месте пропущенной степени!',
+              targetAns: `${d3}${d2}${d1}${d0}`
+            };
+          } else {
+            const base = randomInt(3, 8);
+            const d2 = randomInt(1, base - 1);
+            const d1 = randomInt(1, base - 1);
+            const d0 = randomInt(1, base - 1);
+            const terms = [
+              { str: `${d0} × ${base}⁰`, p: 0 },
+              { str: `${d2} × ${base}²`, p: 2 },
+              { str: `${d1} × ${base}¹`, p: 1 }
+            ].sort(() => Math.random() - 0.5);
+            return {
+              stage: 8, type: 'B', base,
+              prompt: `Степени перемешаны — собери число внимательно:`,
+              layout: 'assemble_target',
+              seriesHtml: terms.map(t => t.str).join(' + '),
+              notice: 'Расставь цифры по разрядам от старшей степени к младшей!',
+              targetAns: `${d2}${d1}${d0}`
+            };
+          }
+
+        case 9: // «Большие системы: раскладываем» (bases 11–16)
+          if (type === 'A') {
+            const base = randomInt(12, 16);
+            const d2 = randomInt(1, 9);
+            const d1 = randomInt(10, base - 1); // letter!
+            const d0 = randomInt(1, 9);
+            const strDigits = [toBaseString(d2, base), toBaseString(d1, base), toBaseString(d0, base)];
+            return {
+              stage: 9, type: 'A', base,
+              prompt: `Запиши десятичные значения цифр в степенной ряд (${base}-ричная система):`,
+              layout: 'power_expand_large_dec',
+              numStr: strDigits.join(''),
+              decValues: [d2, d1, d0]
+            };
+          } else {
+            const base = randomInt(11, 16);
+            const d1 = randomInt(1, 2);
+            const d0 = randomInt(10, base - 1); // letter!
+            const numStr = `${toBaseString(d1, base)}${toBaseString(d0, base)}`;
+            const step2Ans = [d1 * base, d0 * 1];
+            const finalAns = String(d1 * base + d0);
+            return {
+              stage: 9, type: 'B', base,
+              prompt: `Переведи число с буквой в десятичную систему по шагам:`,
+              layout: 'guided_convert_large',
+              numStr,
+              decValues: [d1, d0],
+              step2Ans,
+              finalAns
+            };
+          }
+
+        case 10: // «Большие системы: собираем» (bases 11–16 — NO EXPONENT INPUTS)
+          if (type === 'A') {
+            const base = randomInt(12, 16);
+            const c2 = randomInt(10, base - 1);
+            const c1 = 0; // skipped
+            const c0 = randomInt(10, base - 1);
+            const seriesTerms = [
+              `${c2} × ${base}²`,
+              `${c0} × ${base}⁰`
+            ];
+            const targetAns = `${toBaseString(c2, base)}0${toBaseString(c0, base)}`;
+            return {
+              stage: 10, type: 'A', base,
+              prompt: `Собери число — заменяй числа от 10 буквами (${base}-ричная система):`,
+              layout: 'assemble_target',
+              seriesHtml: seriesTerms.join(' + '),
+              notice: 'Помни: 10=A, 11=B, 12=C, 13=D, 14=E, 15=F',
+              targetAns
+            };
+          } else {
+            const base = randomInt(12, 16);
+            const c2 = randomInt(1, 9);
+            const c1 = randomInt(10, base - 1);
+            const c0 = randomInt(10, base - 1);
+            const terms = [
+              { str: `${c0} × ${base}⁰` },
+              { str: `${c2} × ${base}²` },
+              { str: `${c1} × ${base}¹` }
+            ].sort(() => Math.random() - 0.5);
+            const targetAns = `${toBaseString(c2, base)}${toBaseString(c1, base)}${toBaseString(c0, base)}`;
+            return {
+              stage: 10, type: 'B', base,
+              prompt: `Степени перемешаны — собери число с буквами:`,
+              layout: 'assemble_target',
+              seriesHtml: terms.map(t => t.str).join(' + '),
+              notice: 'Внимательно сопоставь коэффициенты с буквами!',
+              targetAns
+            };
+          }
+      }
+    }
+
+    /* RENDER TASK UI */
+    function renderCurrentTask() {
+      const promptEl = document.getElementById('task-prompt');
+      const bodyEl = document.getElementById('task-body');
+      const feedbackEl = document.getElementById('feedback-msg');
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnNext = document.getElementById('btn-next');
+
+      promptEl.textContent = currentTask.prompt;
+      bodyEl.innerHTML = '';
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback-msg';
+
+      btnSubmit.style.display = 'inline-flex';
+      btnNext.style.display = 'none';
+
+      switch (currentTask.layout) {
+        case 'neighbors': {
+          // [prev2] [prev1] N_base [next1] [next2] in ONE clean row
+          const row = document.createElement('div');
+          row.className = 'row-5-items';
+          row.innerHTML = `
+            <input type="text" class="num-input" data-ans="${currentTask.answers[0]}" data-mode="base" autocomplete="off" spellcheck="false">
+            <input type="text" class="num-input" data-ans="${currentTask.answers[1]}" data-mode="base" autocomplete="off" spellcheck="false">
+            <div class="center-num-badge">${formatNumberWithBase(currentTask.centerVal, currentTask.base)}</div>
+            <input type="text" class="num-input" data-ans="${currentTask.answers[2]}" data-mode="base" autocomplete="off" spellcheck="false">
+            <input type="text" class="num-input" data-ans="${currentTask.answers[3]}" data-mode="base" autocomplete="off" spellcheck="false">
+          `;
+          bodyEl.appendChild(row);
+          break;
+        }
+
+        case 'sequence_5': {
+          // 5 items sequence in ONE clean row
+          const row = document.createElement('div');
+          row.className = 'row-5-items';
+          currentTask.items.forEach(item => {
+            if (item.type === 'fixed') {
+              const div = document.createElement('div');
+              div.className = 'center-num-badge';
+              div.innerHTML = formatNumberWithBase(item.val, currentTask.base);
+              row.appendChild(div);
+            } else {
+              const inp = document.createElement('input');
+              inp.type = 'text';
+              inp.className = 'num-input';
+              inp.setAttribute('data-ans', item.ans);
+              inp.setAttribute('data-mode', 'base');
+              inp.autocomplete = 'off';
+              inp.spellcheck = false;
+              row.appendChild(inp);
+            }
+          });
+          bodyEl.appendChild(row);
+          break;
+        }
+
+        case 'equations_2': {
+          const container = document.createElement('div');
+          container.style.cssText = 'display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%;';
+          currentTask.eqs.forEach(eq => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center; gap: 16px; font-size: 28px; font-weight: 800;';
+            row.innerHTML = `
+              <span>${eq.left} = </span>
+              <input type="text" class="num-input" style="width: 140px; height: 72px;" data-ans="${eq.ans}" data-mode="base" autocomplete="off" spellcheck="false">
+            `;
+            container.appendChild(row);
+          });
+          bodyEl.appendChild(container);
+          break;
+        }
+
+        case 'power_expand_10':
+        case 'power_expand_small':
+        case 'power_expand_large_dec': {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'steps-wrapper';
+
+          // Render top number with orange position indices above digits
+          const topNum = document.createElement('div');
+          topNum.className = 'number-with-indices';
+          const len = currentTask.numStr.length;
+          
+          let topHtml = '';
+          for (let i = 0; i < len; i++) {
+            const idxAbove = len - 1 - i;
+            topHtml += `
+              <div class="digit-index-header">
+                <span class="pos-index">${idxAbove}</span>
+                <span>${currentTask.numStr[i]}</span>
+              </div>
+            `;
+          }
+          topHtml += `<sub class="num-base">${currentTask.base}</sub>`;
+          topNum.innerHTML = topHtml;
+          wrapper.appendChild(topNum);
+
+          // Power series row
+          const seriesRow = document.createElement('div');
+          seriesRow.className = 'step-row';
+          const terms = [];
+          for (let i = 0; i < len; i++) {
+            const exp = len - 1 - i;
+            const expectedAns = (currentTask.layout === 'power_expand_large_dec') 
+              ? String(currentTask.decValues[i]) 
+              : String(currentTask.digits[i]);
+            
+            const mode = (currentTask.layout === 'power_expand_large_dec') ? 'dec' : 'base';
+            terms.push(`
+              <input type="text" class="num-input" style="width: 80px; height: 68px;" data-ans="${expectedAns}" data-mode="${mode}" autocomplete="off" spellcheck="false">
+              <span>× ${currentTask.base}<sup class="num-exp">${exp}</sup></span>
+            `);
+          }
+          seriesRow.innerHTML = terms.join('<span style="color:#64748B; margin:0 4px;">+</span>');
+          wrapper.appendChild(seriesRow);
+          bodyEl.appendChild(wrapper);
+          break;
+        }
+
+        case 'guided_expand_10': {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'steps-wrapper';
+
+          // Top number
+          const topNum = document.createElement('div');
+          topNum.className = 'number-with-indices';
+          topNum.innerHTML = `
+            <div class="digit-index-header"><span class="pos-index">2</span><span>${currentTask.numStr[0]}</span></div>
+            <div class="digit-index-header"><span class="pos-index">1</span><span>${currentTask.numStr[1]}</span></div>
+            <div class="digit-index-header"><span class="pos-index">0</span><span>${currentTask.numStr[2]}</span></div>
+            <sub class="num-base">10</sub>
+          `;
+          wrapper.appendChild(topNum);
+
+          // Step 1: digits
+          const step1 = document.createElement('div');
+          step1.className = 'step-row';
+          step1.id = 'step-1-row';
+          step1.innerHTML = `
+            <input type="text" class="num-input" style="width: 76px; height: 64px;" data-step="1" data-ans="${currentTask.step1Ans[0]}" data-mode="dec"> × 10<sup class="num-exp">2</sup> +
+            <input type="text" class="num-input" style="width: 76px; height: 64px;" data-step="1" data-ans="${currentTask.step1Ans[1]}" data-mode="dec"> × 10<sup class="num-exp">1</sup> +
+            <input type="text" class="num-input" style="width: 76px; height: 64px;" data-step="1" data-ans="${currentTask.step1Ans[2]}" data-mode="dec"> × 10<sup class="num-exp">0</sup>
+          `;
+          wrapper.appendChild(step1);
+
+          // Step 2: values (unlocked after step 1)
+          const step2 = document.createElement('div');
+          step2.className = 'step-row disabled';
+          step2.id = 'step-2-row';
+          step2.innerHTML = `
+            <span style="color:#64748B;">=</span>
+            <input type="text" class="num-input" style="width: 100px; height: 64px;" data-step="2" data-ans="${currentTask.step2Ans[0]}" data-mode="dec" disabled> +
+            <input type="text" class="num-input" style="width: 100px; height: 64px;" data-step="2" data-ans="${currentTask.step2Ans[1]}" data-mode="dec" disabled> +
+            <input type="text" class="num-input" style="width: 100px; height: 64px;" data-step="2" data-ans="${currentTask.step2Ans[2]}" data-mode="dec" disabled>
+          `;
+          wrapper.appendChild(step2);
+
+          bodyEl.appendChild(wrapper);
+          break;
+        }
+
+        case 'guided_convert_small':
+        case 'guided_convert_large': {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'steps-wrapper';
+
+          // Top number
+          const topNum = document.createElement('div');
+          topNum.className = 'number-with-indices';
+          const len = currentTask.numStr.length;
+          let topHtml = '';
+          for (let i = 0; i < len; i++) {
+            topHtml += `
+              <div class="digit-index-header">
+                <span class="pos-index">${len - 1 - i}</span>
+                <span>${currentTask.numStr[i]}</span>
+              </div>
+            `;
+          }
+          topHtml += `<sub class="num-base">${currentTask.base}</sub>`;
+          topNum.innerHTML = topHtml;
+          wrapper.appendChild(topNum);
+
+          // Step 1: power expansion
+          const step1 = document.createElement('div');
+          step1.className = 'step-row';
+          step1.id = 'step-1-row';
+          const s1Terms = [];
+          for (let i = 0; i < len; i++) {
+            const exp = len - 1 - i;
+            const ansVal = (currentTask.layout === 'guided_convert_large') 
+              ? String(currentTask.decValues[i])
+              : String(currentTask.digits[i]);
+            s1Terms.push(`
+              <input type="text" class="num-input" style="width: 76px; height: 64px;" data-step="1" data-ans="${ansVal}" data-mode="dec">
+              <span>× ${currentTask.base}<sup class="num-exp">${exp}</sup></span>
+            `);
+          }
+          step1.innerHTML = s1Terms.join('<span style="color:#64748B;">+</span>');
+          wrapper.appendChild(step1);
+
+          // Step 2: products
+          const step2 = document.createElement('div');
+          step2.className = 'step-row disabled';
+          step2.id = 'step-2-row';
+          const s2Terms = [];
+          for (let i = 0; i < len; i++) {
+            s2Terms.push(`
+              <input type="text" class="num-input" style="width: 96px; height: 64px;" data-step="2" data-ans="${currentTask.step2Ans[i]}" data-mode="dec" disabled>
+            `);
+          }
+          step2.innerHTML = `<span style="color:#64748B;">=</span> ` + s2Terms.join('<span style="color:#64748B;">+</span>');
+          wrapper.appendChild(step2);
+
+          // Step 3: final sum
+          const step3 = document.createElement('div');
+          step3.className = 'step-row disabled';
+          step3.id = 'step-3-row';
+          step3.innerHTML = `
+            <span style="color:#64748B;">=</span>
+            <input type="text" class="num-input" style="width: 130px; height: 68px;" data-step="3" data-ans="${currentTask.finalAns}" data-mode="dec" disabled>
+            <sub class="num-base">10</sub>
+          `;
+          wrapper.appendChild(step3);
+
+          bodyEl.appendChild(wrapper);
+          break;
+        }
+
+        case 'assemble_target': {
+          // Display series at top, ONE centered target box below
+          const seriesEl = document.createElement('div');
+          seriesEl.className = 'power-series-display';
+          seriesEl.innerHTML = currentTask.seriesHtml;
+          bodyEl.appendChild(seriesEl);
+
+          if (currentTask.notice) {
+            const noteEl = document.createElement('div');
+            noteEl.className = 'notice-chip';
+            noteEl.textContent = currentTask.notice;
+            bodyEl.appendChild(noteEl);
+          }
+
+          const targetContainer = document.createElement('div');
+          targetContainer.className = 'target-box-container';
+          
+          const inpMode = (currentTask.base > 10) ? 'base' : 'dec';
+          targetContainer.innerHTML = `
+            <input type="text" class="num-input target-input" data-ans="${currentTask.targetAns}" data-mode="${inpMode}" autocomplete="off" spellcheck="false">
+            <sub class="num-base" style="font-size: 28px;">${currentTask.base}</sub>
+          `;
+          bodyEl.appendChild(targetContainer);
+          break;
+        }
+      }
+
+      setupInputFocusHandlers();
+    }
+
+    /* INPUT FOCUS & KEYBOARD HANDLING */
+    function setupInputFocusHandlers() {
+      const inputs = Array.from(document.querySelectorAll('#task-body input:not([disabled])'));
+      
+      inputs.forEach(inp => {
+        inp.addEventListener('focus', () => {
+          focusedInput = inp;
+        });
+
+        inp.addEventListener('input', () => {
+          // Automatic uppercase for letter mode
+          if (inp.getAttribute('data-mode') === 'base') {
+            inp.value = inp.value.toUpperCase();
+          }
+          inp.classList.remove('incorrect');
+        });
+      });
+
+      if (inputs.length > 0) {
+        inputs[0].focus();
+        focusedInput = inputs[0];
+      }
+    }
+
+    function setupKeyboardListeners() {
+      document.addEventListener('keydown', (e) => {
+        // Teacher panel shortcut: Alt + S (RU/EN friendly)
+        if (e.altKey && (e.code === 'KeyS' || e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'ы')) {
+          e.preventDefault();
+          openTeacherModal();
+          return;
+        }
+
+        // Close modal on Escape
+        if (e.key === 'Escape') {
+          closeTeacherModal();
+          return;
+        }
+
+        // Enter key handling
+        if (e.key === 'Enter') {
+          const btnNext = document.getElementById('btn-next');
+          if (btnNext && btnNext.style.display !== 'none') {
+            advanceTask();
+          } else {
+            checkTaskAnswer();
+          }
+          return;
+        }
+
+        // Auto-convert physical keys A..F to uppercase letters in base-mode inputs
+        if (focusedInput && focusedInput.getAttribute('data-mode') === 'base' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          if (e.code >= 'KeyA' && e.code <= 'KeyF') {
+            const letterMap = { KeyA: 'A', KeyB: 'B', KeyC: 'C', KeyD: 'D', KeyE: 'E', KeyF: 'F' };
+            const letter = letterMap[e.code];
+            if (letter) {
+              e.preventDefault();
+              insertAtCursor(focusedInput, letter);
+            }
+          }
+        }
+      });
+    }
+
+    function insertAtCursor(input, text) {
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const val = input.value;
+      input.value = val.substring(0, start) + text + val.substring(end);
+      input.selectionStart = input.selectionEnd = start + text.length;
+      input.dispatchEvent(new Event('input'));
+    }
+
+    function handleCheatTileClick(letter, decVal) {
+      if (!focusedInput || focusedInput.disabled) {
+        // find first active input
+        focusedInput = document.querySelector('#task-body input:not([disabled])');
+      }
+      if (!focusedInput) return;
+
+      const mode = focusedInput.getAttribute('data-mode');
+      const textToInsert = (mode === 'dec') ? decVal : letter;
+      insertAtCursor(focusedInput, textToInsert);
+      focusedInput.focus();
+    }
+
+    /* CHECK ANSWER LOGIC */
+    function checkTaskAnswer() {
+      const feedbackEl = document.getElementById('feedback-msg');
+      feedbackEl.textContent = '';
+      feedbackEl.className = 'feedback-msg';
+
+      if (currentTask.layout.startsWith('guided_')) {
+        checkGuidedTaskStep();
+        return;
+      }
+
+      const inputs = Array.from(document.querySelectorAll('#task-body input:not([disabled])'));
+      let allCorrect = true;
+
+      inputs.forEach(inp => {
+        const userVal = inp.value.trim().toUpperCase();
+        const expectedVal = inp.getAttribute('data-ans').trim().toUpperCase();
+
+        if (userVal === expectedVal) {
+          inp.classList.remove('incorrect');
+          inp.classList.add('correct');
+        } else {
+          inp.classList.remove('correct');
+          inp.classList.add('incorrect');
+          allCorrect = false;
+        }
+      });
+
+      if (allCorrect) {
+        onTaskSuccessfullyCompleted();
+      } else {
+        feedbackEl.textContent = 'Проверь выделенные поля и попробуй ещё раз!';
+        feedbackEl.className = 'feedback-msg error';
+      }
+    }
+
+    function checkGuidedTaskStep() {
+      const feedbackEl = document.getElementById('feedback-msg');
+
+      // Determine current active step
+      let activeStep = 1;
+      const step2Row = document.getElementById('step-2-row');
+      const step3Row = document.getElementById('step-3-row');
+
+      if (step3Row && !step3Row.classList.contains('disabled')) {
+        activeStep = 3;
+      } else if (step2Row && !step2Row.classList.contains('disabled')) {
+        activeStep = 2;
+      }
+
+      const stepInputs = Array.from(document.querySelectorAll(`#task-body input[data-step="${activeStep}"]`));
+      let stepCorrect = true;
+
+      stepInputs.forEach(inp => {
+        const userVal = inp.value.trim().toUpperCase();
+        const expectedVal = inp.getAttribute('data-ans').trim().toUpperCase();
+
+        if (userVal === expectedVal) {
+          inp.classList.remove('incorrect');
+          inp.classList.add('correct');
+          inp.disabled = true;
+        } else {
+          inp.classList.remove('correct');
+          inp.classList.add('incorrect');
+          stepCorrect = false;
+        }
+      });
+
+      if (!stepCorrect) {
+        feedbackEl.textContent = 'Ошибочка в этом шаге! Проверь расчёты.';
+        feedbackEl.className = 'feedback-msg error';
+        return;
+      }
+
+      // Step correct -> unlock next step or finish
+      if (activeStep === 1) {
+        if (step2Row) {
+          step2Row.classList.remove('disabled');
+          const nextInputs = step2Row.querySelectorAll('input');
+          nextInputs.forEach(i => i.disabled = false);
+          setupInputFocusHandlers();
+          feedbackEl.textContent = 'Отлично! Теперь посчитай значение каждого слагаемого.';
+          feedbackEl.className = 'feedback-msg success';
+        } else {
+          onTaskSuccessfullyCompleted();
+        }
+      } else if (activeStep === 2) {
+        if (step3Row) {
+          step3Row.classList.remove('disabled');
+          const nextInputs = step3Row.querySelectorAll('input');
+          nextInputs.forEach(i => i.disabled = false);
+          setupInputFocusHandlers();
+          feedbackEl.textContent = 'Супер! Осталось сложить результаты.';
+          feedbackEl.className = 'feedback-msg success';
+        } else {
+          onTaskSuccessfullyCompleted();
+        }
+      } else if (activeStep === 3) {
+        onTaskSuccessfullyCompleted();
+      }
+    }
+
+    function onTaskSuccessfullyCompleted() {
+      const feedbackEl = document.getElementById('feedback-msg');
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnNext = document.getElementById('btn-next');
+
+      feedbackEl.textContent = 'Отлично! Всё верно!';
+      feedbackEl.className = 'feedback-msg success';
+
+      btnSubmit.style.display = 'none';
+      btnNext.style.display = 'inline-flex';
+      btnNext.focus();
+
+      // Update stage credit
+      const prog = stageProgress[currentStageIndex];
+      if (currentTask.type === 'A') prog.typeA = true;
+      if (currentTask.type === 'B') prog.typeB = true;
+
+      saveProgress();
+      updateHeaderUI();
+    }
+
+    function advanceTask() {
+      loadStageTask();
+    }
+
+    /* TEACHER PANEL ACTIONS */
+    function openTeacherModal() {
+      document.getElementById('teacher-modal').classList.add('active');
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacher-modal').classList.remove('active');
+    }
+
+    function handleModalBackdropClick(e) {
+      if (e.target.id === 'teacher-modal') closeTeacherModal();
+    }
+
+    function renderTeacherStageGrid() {
+      const grid = document.getElementById('teacher-stage-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const btn = document.createElement('button');
+        btn.className = `grid-stage-btn ${i === currentStageIndex ? 'active' : ''}`;
+        btn.textContent = `Этап ${i + 1}`;
+        btn.onclick = () => {
+          appMode = 'manual_stage';
+          manualStageIndex = i;
+          liveStartTime = Date.now();
+          currentStageIndex = i;
+          currentTask = null;
+          closeTeacherModal();
+          tickStateMachine();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function setModeLiveNow() {
+      appMode = 'live_now';
+      liveStartTime = Date.now();
+      currentTask = null;
+      closeTeacherModal();
+      tickStateMachine();
+    }
+
+    function setModeSchedule() {
+      appMode = 'schedule';
+      currentTask = null;
+      closeTeacherModal();
+      tickStateMachine();
+    }
+
+    function setModeManualFinish() {
+      appMode = 'manual_finish';
+      closeTeacherModal();
+      tickStateMachine();
+    }
+
+    function resetAllProgress() {
+      stageProgress = Array(10).fill(null).map(() => ({ typeA: false, typeB: false }));
+      saveProgress();
+      currentTask = null;
+      closeTeacherModal();
+      tickStateMachine();
+    }
+
+    // INITIALIZE APP ON LOAD
+    window.onload = function() {
+      init();
+    };
+  </script>
+</body>
+</html>
