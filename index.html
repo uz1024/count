@@ -790,7 +790,7 @@
       </div>
 
       <div class="schedule-pill">
-        <span>🕒 Начало урока в 13:10</span>
+        <span>🕒 Начало урока в 10:45</span>
       </div>
     </div>
   </div>
@@ -858,7 +858,7 @@
 
       <div class="teacher-actions">
         <button type="button" class="teacher-btn" onclick="setModeLiveNow()">▶ Запустить урок сейчас (35 мин)</button>
-        <button type="button" class="teacher-btn" onclick="setModeSchedule()">🕒 По расписанию (13:10)</button>
+        <button type="button" class="teacher-btn" onclick="setModeSchedule()">🕒 По расписанию (10:45)</button>
         <button type="button" class="teacher-btn" onclick="setModeManualFinish()">🏁 Финальный экран</button>
         <button type="button" class="teacher-btn" style="color: #E11D48;" onclick="resetAllProgress()">🔄 Сбросить баллы и прогресс</button>
       </div>
@@ -1098,7 +1098,7 @@
         }
       } else {
         // 'schedule' mode: Start 13:10:00
-        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 10, 0, 0);
+        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 45, 0, 0);
         const endToday = new Date(startToday.getTime() + TOTAL_LESSON_SECONDS * 1000);
 
         if (now < startToday) {
@@ -1150,7 +1150,7 @@
         const subEl = document.getElementById('final-subtitle');
         if (subEl) {
           subEl.textContent = appMode === 'schedule'
-            ? 'Урок по расписанию завершён (13:10 – 13:45)'
+            ? 'Урок по расписанию завершён (10:45 – 11:20)'
             : 'Урок завершён';
         }
 
